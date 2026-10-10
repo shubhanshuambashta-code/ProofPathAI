@@ -8,7 +8,7 @@ import { store } from "@/lib/store";
 import { readJsonLimited } from "@/lib/requestBody";
 import type { CaseRecord } from "@/lib/types";
 export const runtime = "nodejs";
-export async function GET() { try { return NextResponse.json(await store.list()); } catch { return NextResponse.json({ error: "Could not read local case storage." }, { status: 500 }); } }
+export async function GET() { try { return NextResponse.json(await store.list()); } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Could not read case storage." }, { status: 500 }); } }
 export async function POST(request: Request) {
   try {
     const length = Number(request.headers.get("content-length") || 0); if (length > 70 * 1024 * 1024) return NextResponse.json({ error: "Request exceeds the 70 MB total upload limit." }, { status: 413 });
@@ -25,3 +25,4 @@ export async function POST(request: Request) {
     await store.save(record); return NextResponse.json(record, { status: 201 });
   } catch (e) { const message = e instanceof Error ? e.message : "Could not create case."; const status = message.includes("total upload limit") ? 413 : e instanceof ZodError || e instanceof SyntaxError || message.includes("Unsupported") || message.includes("Upload") || message.includes("exceeds") || message.includes("file type") || message.includes("valid upload") || message.includes("corrupt") || message.includes("empty") ? 400 : 500; return NextResponse.json({ error: message }, { status }); }
 }
+
