@@ -52,8 +52,8 @@ Set these in `.env.local`:
 | `AI_MODEL` | Provider model supporting chat completions and JSON mode (default `gpt-4o-mini`). |
 | `AI_BASE_URL` | API base URL (default `https://api.openai.com/v1`). |
 | `MAX_UPLOAD_MB` | Per-file size limit (default `10`). |
-| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST endpoint for deployed case storage. |
-| `UPSTASH_REDIS_REST_TOKEN` | Server-only Upstash Redis token. |
+| `UPSTASH_REDIS_REST_URL` / `KV_REST_API_URL` | Upstash Redis REST endpoint for deployed case storage. |
+| `UPSTASH_REDIS_REST_TOKEN` / `KV_REST_API_TOKEN` | Server-only Upstash Redis token. |
 
 Obtain a key from your selected provider and place it only in `.env.local`. Without a key, case creation, editing, and deletion work, but analysis returns a clear configuration error; there are no fake/demo AI results. The app sends case details and extracted evidence text to the configured provider for analysis. Images are sent temporarily for text reading only when the key is configured and are not persisted. Do not upload information you do not want processed by that provider.
 
@@ -84,7 +84,7 @@ npm run build
 npm run start
 ```
 
-Set the AI environment values in the hosting provider's server-side environment settings. For Vercel, install/connect the Upstash Redis integration, connect a Redis database to this project, and redeploy so `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are available. Local development continues to use the JSON-file store. No deployment has been performed from this repository.
+Set the AI environment values in the hosting provider's server-side environment settings. For Vercel, install/connect the Upstash Redis integration, connect a Redis database to this project, and redeploy so its Redis URL and token are available (`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` or `KV_REST_API_URL` / `KV_REST_API_TOKEN`). Local development continues to use the JSON-file store. No deployment has been performed from this repository.
 
 ## Known limitations
 
