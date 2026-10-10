@@ -52,6 +52,8 @@ Set these in `.env.local`:
 | `AI_MODEL` | Provider model supporting chat completions and JSON mode (default `gpt-4o-mini`). |
 | `AI_BASE_URL` | API base URL (default `https://api.openai.com/v1`). |
 | `MAX_UPLOAD_MB` | Per-file size limit (default `10`). |
+| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST endpoint for deployed case storage. |
+| `UPSTASH_REDIS_REST_TOKEN` | Server-only Upstash Redis token. |
 
 Obtain a key from your selected provider and place it only in `.env.local`. Without a key, case creation, editing, and deletion work, but analysis returns a clear configuration error; there are no fake/demo AI results. The app sends case details and extracted evidence text to the configured provider for analysis. Images are sent temporarily for text reading only when the key is configured and are not persisted. Do not upload information you do not want processed by that provider.
 
@@ -59,8 +61,8 @@ Obtain a key from your selected provider and place it only in `.env.local`. With
 
 - Up to five files, 10 MB each by default, with a 70 MB total request cap. Allowed types: PDF, TXT, PNG, JPEG, WEBP.
 - Text-based PDFs and TXT files are extracted on the server. Scanned PDFs are not OCR processed; the app reports that no selectable text was found. Image text reading uses the configured vision-capable provider.
-- Extracted text and case analysis are stored unencrypted in `data/cases.json` on the local machine. The JSON file is not a multi-user database; there is no authentication, user isolation, encryption at rest, cloud backup, or production multi-tenant guarantee. Delete cases in the app or remove local data when appropriate.
-- This implementation is intended for local evaluation. Before public deployment, add authentication, per-user authorization, a managed database and file-storage policy, abuse/rate limiting, and operational privacy controls.
+- In local development, extracted text and case analysis are stored in `data/cases.json`. In production, the app requires Upstash Redis and stores each case in the `proofpath:cases` hash. It will not try writing to Vercel's read-only deployment directory.
+- There are no user accounts or per-user authorization. Anyone who can access the deployed app can see and manage the same cases, so keep the deployment private or add authentication before entering sensitive real-world information. Delete cases in the app when appropriate.
 
 ## Development checks
 
@@ -82,7 +84,7 @@ npm run build
 npm run start
 ```
 
-Set the AI environment values in the hosting provider's server-side environment settings. The JSON-file store is not suitable for serverless or multi-instance deployments because files may be ephemeral or not shared; replace it with a managed database before deploying for real users. No deployment has been performed from this repository.
+Set the AI environment values in the hosting provider's server-side environment settings. For Vercel, install/connect the Upstash Redis integration, connect a Redis database to this project, and redeploy so `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are available. Local development continues to use the JSON-file store. No deployment has been performed from this repository.
 
 ## Known limitations
 
@@ -91,3 +93,4 @@ Set the AI environment values in the hosting provider's server-side environment 
 - Scanned PDF OCR, PDF page-level citations, and DOCX export are not included.
 - AI quality depends on the configured provider/model. Source-excerpt checks are conservative string matches, not independent proof that a claim is objectively true.
 - Rate limits are handled at the provider error boundary; application-wide per-user rate limiting is not implemented.
+
